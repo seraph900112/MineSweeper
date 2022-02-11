@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport"
+	content="width=750, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<link rel="stylesheet" type="text/css" href="http://at.alicdn.com/t/font_963134_2tgi4v5uqgb.css">
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.21/vue.min.js"></script>
+
+	<style type="text/css">
+		*{
+			margin:0;
+			padding:0;
+
+		}
+		.input-container{
+			margin:10px 0;
+		}
+		.btn{
+			width:60px;
+			line-height: 30px;
+			background: #3388ff;
+			color:#fff;
+			border:0 none;
+			margin:0 20px;
+		}
+		.type-item{
+			margin-bottom:10px;
+			display: flex;
+			align-items:center;
+			justify-content: center;
+		}
+		.type-item .item{
+			width:180px;
+		}
+		.left-mine{
+			text-align: center;
+		}
+		.wrapper{
+			display: flex;
+			justify-content: center;
+		}
+		.content{
+			margin-top:10px;
+			padding:4px;
+			border-radius: 4px;
+			background: lightblue;
+		}
+		.content .line{
+			margin:4px 0;
+			display: flex;
+			justify-content: center;
+		}
+		.content .line .item{
+			margin:0 2px;
+			width:20px;
+			height:20px;
+			border-radius:2px;
+			background: gray;
+			box-shadow: 0 0 4px 1px rgba(255,255,255,0.3);
+			cursor:pointer;
+			text-align: center;
+			font-size:12px;
+			color:#fff;
+			line-height: 20px;
+			transition: all 0.5s;
+			position:relative;
+			overflow: hidden;
+		}
+		.content .line .item .block{
+			width:100%;
+			height:100%;
+			display: block;
+			position:absolute;
+			top:0;
+			left:0;
+			text-align: center;
+		}
+		.content .line .item.active{
+			background: black;
+		}
+		.content .line .item.danger{
+			background: #fff;
+			color:red;
+		}
+		.content .line .item .mark{
+			font-size:30px;
+		}
+	</style>
+</head>
+
+<body>
+	<div id="container" oncontextmenu="return false">
+		<div class="type" v-cloak>
+			<div class="type-item" v-for="(item,index) in typeArr" :key="index">
+				<div class="item">难度{{index+1}}：{{item.row}}&times;{{item.column}},{{item.mine}}个雷</div>
+				<button class="btn" @click="_initArr(index)">选择</button>
+			</div>
+		</div>
+		<div class="left-mine">
+			<span>剩余雷数：</span>
+			<span>{{leftMineNum}}</span>
+		</div>
+		<div class="wrapper">
+			<div class="content" v-show="numArr.length">
+			<div class="line" v-for="(rowItem,rowIndex) in numArr" :key="rowIndex">
+				<div 
+				class="item"
+				v-for="(columnItem,columnIndex) in rowItem" 
+				:key="columnIndex"
+				@mouseDown="_searchMine($event,rowIndex,columnIndex)"
+				:class="{active:columnItem.isOpen&&columnItem.value!='9',danger:columnItem.isOpen&&columnItem.value=='9'}"
+				>	
+					<div v-if="columnItem.isOpen" class="block">
+						<span class="iconfont icon-dilei" v-if='columnItem.value==9'></span>
+						<span v-if='columnItem.value!=9'>{{columnItem.value}}</span>
+					</div>
+                    
+					<div v-if="columnItem.isMark" class="block">
+						<span class="iconfont icon-qizhi"></span>
+						<span>&times;</span>
+					</div>
+				</div>
+			</div>
+		</div>
+		</div>
+		
+	</div>
+</body>
+
+<script type="text/javascript">
+	let app=new Vue({
+		el:'#container',
+		data:{
+			typeArr:[{
+				row:9,
+				column:9,
+				mine:10
+			},{
+				row:16,
+				column:16,
+				mine:40
+			},{
+				row:16,
+				column:40,
+				mine:99
+			}
+			],
+			curType:{
+				row:0,
+				column:0,
+				mine:0
+			},
+			numArr:[],
+			leftMineNum:0,
+			gameStep:0,
+			isEnd:true
+		},
+		methods:{
+			_initArr(index){
+				this.curType=this.typeArr[index];
+				let {row,column,mine}=this.curType;
+				this.leftMineNum=mine;
+				this.gameStep=row*column;
+				this.isEnd=false;
+				this._createMineArea();
+			},
+			_createMineArea(){
+				this._putMineInArea();
+				this._getEveryMineNum();
+			},
+			//将雷放入区域
+			_putMineInArea(){
+				let {curType}=this;
+				let {row,column,mine}=curType;
+				let numArr=new Array(row);
+				for(let i=0;i<row;i++){
+					numArr[i]=new Array(column)
+				}
+				let putedMineNum=0;
+				while(putedMineNum<mine){
+					let putRow=Math.floor(Math.random()*row);
+					let putColumn=Math.floor(Math.random()*column);
+					let putPosition=numArr[putRow][putColumn];
+					if(!putPosition){
+						numArr[putRow][putColumn]={
+							value:9,
+							isMark:false,
+							isOpen:false
+						};
+						putedMineNum++;
+					}
+				}
+				this.numArr=numArr;
+			},
+			//获取每一个格子附近的雷数
+			_getEveryMineNum(){
+				let {numArr}=this;
+				let rowLength=numArr.length;
+				let columnLength=numArr[0].length;
+				for(let row=0;row<rowLength;row++){
+					for(let column=0;column<columnLength;column++){
+						let curContent=numArr[row][column];
+						if(curContent&&curContent.value===9){
+							continue;
+						}
+						let posArr=[[row-1,column],[row-1,column-1],[row-1,column+1],[row,column-1],[row,column+1],[row+1,column+1],[row+1,column-1],[row+1,column]];
+						let mineNum=0;
+						for(let i=0;i<8;i++){
+							let _row=posArr[i][0];
+							let _column=posArr[i][1];
+							if(_row<0||_column<0||_row>numArr.length-1||_column>numArr[0].length){
+								continue
+							}
+							let curPos=numArr[_row][_column];
+							if(curPos&&curPos.value==9){
+								mineNum++
+							}
+						}
+						numArr[row][column]={
+							value:mineNum||'',
+							isMark:false,
+							isOpen:false
+						}
+
+						this.$set(this.numArr,row,numArr[row])
+					}
+				}
+				console.log(numArr);
+			},
+			_searchMine(e,row,column){
+				let {numArr,isEnd}=this;
+				if(isEnd){
+					return
+				}
+				let curPos=numArr[row][column];
+				//点击鼠标右键
+				let {which}=e;
+				if(which==3){
+					//点击右键
+					this._rightClick(row,column);
+					return 
+				}
+				//已被标记，不可左击
+				if(curPos.isMark){
+					return
+				}
+				if(curPos.value==9){
+					//点击到雷，游戏结束
+					this._failGame();
+					return
+				}
+				//点击左键
+				this._leftClick(row,column);
+				this._isAllClick();
+			},
+			//点击左键
+			_leftClick(row,column){
+				let {numArr,gameStep}=this;
+				let rowMax=numArr.length;
+				let columnMax=numArr[0].length;
+				//判断是否超出游戏边界
+				if(row<0||column<0||row>rowMax-1||column>columnMax-1){
+					return
+				}
+				let curPos=numArr[row][column];
+				//isOpen表示格子是否已经点开
+				if(curPos.isOpen){
+					return
+				}
+				curPos.isOpen=true;
+				//gameStep用来判断格子是否全部被点击
+				gameStep--;
+				this.gameStep=gameStep;
+				this.$set(this.numArr,row,numArr[row]);
+				//如果该格子有数字，return
+				if(curPos.value){
+					return
+				}
+				//剩下的便是格子是空白的情况，向四周进行延伸
+				this._leftClick(row-1,column);
+				this._leftClick(row+1,column);
+				this._leftClick(row,column-1);
+				this._leftClick(row,column+1);
+			},
+			//点击右键
+			_rightClick(row,column){
+				let {numArr,leftMineNum,gameStep}=this;
+				let curBlock=numArr[row][column];
+				let {isMark}=curBlock;
+				curBlock.isMark=!isMark;
+				leftMineNum=leftMineNum+(isMark?1:-1);
+				gameStep=gameStep+(isMark?1:-1);
+				
+				this.numArr=numArr;
+				this.leftMineNum=leftMineNum;
+				this.gameStep=gameStep;
+				//如果已经标记完毕，立刻开始结算
+				if(leftMineNum<=0){
+					this._endGame();
+					return 
+				}
+			},
+			//判断是否将格子全部点击完
+			_isAllClick(){
+				let {gameStep}=this;
+				if(gameStep>0){
+					return
+				}
+				this._endGame()
+			},
+			//进行游戏结算
+			_endGame(){
+				let {numArr}=this;
+				let isAllMark=numArr.every(rowItem=>{
+					return rowItem.every(columnItem=>{
+						return (columnItem.value==9&&columnItem.isMark)||columnItem.value!=9
+					})
+				})
+				if(isAllMark){
+					this._passGame()
+				}else{
+					this._failGame();
+				}
+			},
+			//游戏通关
+			_passGame(){
+				this.isEnd=true;
+				alert('恭喜你，游戏通关！')
+			},
+			//结束游戏
+			_failGame(){
+				let {numArr}=this;
+				numArr.forEach(rowItem=>{
+					rowItem.forEach(columnItem=>{
+						let {value,isOpen,isMark}=columnItem;
+						if(value==9){
+							columnItem.isOpen=true
+						}
+					})
+				})
+				this.numArr=numArr;
+				this.isEnd=true;
+				setTimeout(function(){
+					alert('游戏失败！')
+				},300)
+			}
+		}
+	})
+</script>
+</html>
