@@ -44,13 +44,13 @@ const cos_mines = ref(10)
     </h2>
     <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
       <div class="accordion-body" @click="emit_row_col(8, 8, 10, '初級')">
-        <strong>初級</strong>
+        <strong class="pe-auto">初級</strong>
       </div>
       <div class="accordion-body" @click="emit_row_col(16, 16, 40, '中級')">
-        <strong>中級</strong>
+        <strong class="pe-auto">中級</strong>
       </div>
       <div class="accordion-body" @click="emit_row_col(16, 30, 99, '高級')">
-        <strong>高級</strong>
+        <strong class="pe-auto">高級</strong>
       </div>
     </div>
   </div>
@@ -88,4 +88,7 @@ const cos_mines = ref(10)
 </template>
 
 <style>
+  .pe-auto{
+    cursor: pointer;
+  }
 </style>

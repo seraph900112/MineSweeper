@@ -12,16 +12,30 @@ const real_rest_mines = ref(mine_Num.value);
 const arr = ref(new Array);
 const stateArr = ref(new Array);
 const ok_string =ref();
+const size_arr = ref({small: true, mid: false, big: false})
 
 onMounted( () => init() );
 
 
-function set_row_col(){
-    col.value = parseInt(input_col.value);
-    row.value = parseInt(input_row.value);
-    input_col.value = null;
-    input_row.value = null;
-    init();
+function change_size(s){
+    var t = true;
+    var f = false;
+    if(s==1){
+        size_arr.value.small = t;
+        size_arr.value.mid = f;
+        size_arr.value.big = f;
+    }
+    if(s==2){
+        size_arr.value.small =f ;
+        size_arr.value.mid = t;
+        size_arr.value.big = f;
+    }
+    if(s==3){
+        size_arr.value.small = f;
+        size_arr.value.mid= f;
+        size_arr.value.big = t;
+    }
+
 }
 
 function init(){
@@ -237,7 +251,7 @@ function all_Close(){
 
 			<div class="line" v-for="(r,r_Index) in row" :key="r_Index">
 
-				<div class="item" v-for="(c,c_Index) in col" :key="c_Index" 
+				<div class="item" :class=" size_arr.small ? 'small' : (size_arr.mid ? 'mid' : (size_arr.big ? 'big' : 'small' ))"  v-for="(c,c_Index) in col" :key="c_Index" 
                     @contextmenu.prevent="Add_Flag(e, r_Index, c_Index)"
                     @click="left_click(e, r_Index, c_Index)">
 
@@ -264,12 +278,40 @@ function all_Close(){
 	</div>
 
     <div class="ms-5">
-    
-        <button class="mt-2" @click = "all_Open()">全開</button>
-        <button class="mt-2" @click = "all_Close()">全關</button>
-        <button class="mt-2" @click = "init()">重新開始</button>
-
+        <div class="row mt-3 ms-3 ">
+            
+            <div class="col-3 ms-2">
+                <button class="mt-2 btn btn-outline-secondary" @click = "all_Open()">全開</button>
+            </div>
+            
+            <div class="col-3">
+                <button class="mt-2 btn btn-outline-secondary" @click = "all_Close()">全關</button>
+            </div>
+            <div class="col-4">
+                <button class="mt-2 btn btn-outline-secondary" @click = "init()">重新開始</button>
+            </div>
+        </div>
+        <div class="row mt-5">
+        <div class="row mb-5">
+            <div class ="col-6" style="font-size: 18px;">
+                <strong>請方格選擇大小:</strong>
+            </div>
+             <div class="col-2">
+                <button type="button" class="btn btn-outline-primary" @click="change_size(1)">小</button>
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn btn-outline-primary" @click="change_size(2)">中</button>
+            </div>
+            <div class="col-2">
+                <button type="button" class="btn btn-outline-primary" @click="change_size(3)">大</button>
+            </div>
+        </div>
+        <div class="row ">
+           
+        </div>
     </div>
+    </div>
+    
 
     <!-- Button trigger modal -->
     <div v-show="false" id ="btn" type="button" class=" disabled" data-bs-toggle="modal" data-bs-target="#staticBackdrop"> 
@@ -312,19 +354,37 @@ function all_Close(){
 	}
 	.content .line .item{
 		margin:0 2px;
-		width:30px;
-		height:30px;
 		border-radius:2px;
-		background: rgb(171, 167, 224);
+		background: rgb(7, 231, 145);
 		cursor:pointer;
 		text-align: center;
-		font-size:12px;
 		color:#fff;
 		line-height: 20px;
 		transition: all 0.5s;
 		position:relative;
 		overflow: hidden;
 	}
+    .content .line .small{
+        width:30px;
+		height:30px;
+        font-size:16px;
+    }
+
+    .content .line .mid{
+        width:40px;
+		height:40px;
+        font-size:20px;
+    }
+
+    .content .line .big{
+        width:50px;
+		height:50px;
+        font-size:24px;
+    }
+
+
+
+
 	.content .line .item .block{
 		width:100%;
 		height:100%;
@@ -336,7 +396,7 @@ function all_Close(){
 	}
 
     .content .line .item .block .unOpen{
-        background-color: rgb(74, 240, 74);
+        background-color: rgb(8, 68, 78);
 	}
 
     .content .line .item .block .Open{
