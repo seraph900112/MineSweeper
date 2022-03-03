@@ -86,51 +86,52 @@ function get_NearInfo(index){
     var info = new Array;
     /*row = index/row col = index%col*/
     /*左上*/
+
     if(arr.value[index]!=-1){
-        if(index/row.value != 0 && index%row.value != 0){
-            info.push({val: arr.value[index-row.value-1], pos: index-row.value-1 });
+        if(index/col.value != 0 && index%col.value != 0){
+            info.push({val: arr.value[index-col.value-1], pos: index-col.value-1 });
         }else{
             info.push(-2);
         };
     /*上*/
-        if(index/row.value != 0){
-            info.push({val: arr.value[index-row.value], pos: index-row.value});
+        if(index/col.value != 0){
+            info.push({val: arr.value[index-col.value], pos: index-col.value});
         }else{
             info.push(-2);
         };
     /*右上*/
-        if(index/row.value != 0 && index%row.value != col.value -1){
-            info.push({val: arr.value[index-row.value+1], pos: index-row.value+1});
+        if(index/col.value != 0 && index%col.value != col.value -1){
+            info.push({val: arr.value[index-col.value+1], pos: index-col.value+1});
         }else{
             info.push(-2);
         };   
     /*左*/
-        if(index%row.value != 0){
+        if(index%col.value != 0){
             info.push({val: arr.value[index-1], pos: index-1});
         }else{
             info.push(-2);
         }; 
     /*右*/
-        if(index%row.value != col.value -1){
+        if(index%col.value != col.value -1){
             info.push({val: arr.value[index+1], pos: index+1});
         }else{
             info.push(-2);
         };
     /*左下*/
-        if(index/row.value != row.value -1 && index%row.value !=0){
-            info.push({val: arr.value[index+row.value-1], pos: index+row.value-1});
+        if(index/col.value != row.value -1 && index%col.value !=0){
+            info.push({val: arr.value[index+col.value-1], pos: index+col.value-1});
         }else{
             info.push(-2);
         };    
     /*下*/
-        if(index/row.value != row.value -1){
-            info.push({val: arr.value[index+row.value], pos: index+row.value});
+        if(index/col.value != col.value -1){
+            info.push({val: arr.value[index+col.value], pos: index+col.value});
         }else{
             info.push(-2);
         }
     /*右下*/
-        if(index/row.value != row.value -1 && index%row.value !=col.value -1){
-            info.push({val: arr.value[index+row.value+1], pos: index+row.value+1});
+        if(index/col.value != col.value -1 && index%col.value != col.value -1){
+            info.push({val: arr.value[index+col.value+1], pos: index+col.value+1});
         }else{
             info.push(-2);
         };  
@@ -181,7 +182,7 @@ function left_click(e, row_, col_){
         stateArr.value[curIndex].Open = true;
         ok_string.value = "You Lose!";
         document.getElementById('btn').click();
-        all_Open();
+        //all_Open();
         return;
     }
 
@@ -190,14 +191,18 @@ function left_click(e, row_, col_){
         return;
     }
 
-    var tmp = get_NearInfo(curIndex);
-
+    
     if(arr.value[curIndex] == 0 && stateArr.value[curIndex].Open == false){
-        
+        var tmp = get_NearInfo(curIndex);
+
         stateArr.value[curIndex].Open = true;
+
         for(var i=0; i<tmp.length; i++){
             if(tmp[i].val >= 0){
-               left_click(e, Math.floor(tmp[i].pos/row.value), tmp[i].pos % row.value);
+
+               left_click(e ,Math.floor(tmp[i].pos/col.value) ,tmp[i].pos % col.value);
+
+               console.log("clicked"+ Math.floor(tmp[i].pos/row.value) +"," + tmp[i].pos % row.value);
             }
         }
     }
